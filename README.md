@@ -53,6 +53,49 @@ python run_server.py
 
 This starts a local server at `http://localhost:8000` with endpoints under `/api/*`.
 
+### Run the UI (minimal “fullscreen GIF” viewer)
+
+The UI is intentionally simple: it shows the **current GIF centered** and briefly overlays the **GIF filename** when it changes.
+
+1) Start the backend (mock display is fine on laptops):
+
+```bash
+cd backend
+source .venv/bin/activate
+mkdir -p ../_local_gifs
+DISPLAY_DRIVER=mock GIF_DIR="$(pwd)/../_local_gifs" python run_server.py
+```
+
+If port `8000` is already in use, pick another:
+
+```bash
+PORT=8001 DISPLAY_DRIVER=mock GIF_DIR="$(pwd)/../_local_gifs" python run_server.py
+```
+
+2) Start the UI dev server:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+If your backend is on a different port, easiest is to point the Vite dev proxy at it (keeps requests same-origin on `localhost:5173`):
+
+```bash
+VITE_API_TARGET=http://127.0.0.1:8001 npm run dev
+```
+
+Then open the UI at `http://localhost:5173`.
+
+Notes:
+- The UI loads the current GIF from `GET /api/gif/current`.
+- You can still use the API directly via `http://localhost:8000/docs`.
+
+Troubleshooting:
+- If the UI shows `GET http://localhost:5173/api/... 404`, your proxy is pointing at the wrong port (set `VITE_API_TARGET` and restart `npm run dev`).
+- If you see `net::ERR_CONNECTION_REFUSED` for `http://127.0.0.1:8001/api/status`, the backend isn't actually running on that port (re-run the backend command and keep it running).
+
 ### 1) Enable SPI on Raspberry Pi
 
 Enable SPI using `raspi-config` (or equivalent for your distro), then reboot.

@@ -71,6 +71,19 @@ class PlayerService:
         with self._lock:
             return list(self._items)
 
+    def current(self) -> GifItem | None:
+        with self._lock:
+            if not self._items:
+                return None
+            return self._items[self._index]
+
+    def get(self, index: int) -> GifItem | None:
+        with self._lock:
+            if not self._items:
+                return None
+            index = clamp_index(index, len(self._items))
+            return self._items[index]
+
     def status(self) -> PlayerStatus:
         with self._lock:
             name = self._items[self._index].name if self._items else None
