@@ -1,0 +1,26 @@
+[Unit]
+Description=gif-player (FastAPI + UI)
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+
+# Repo location (as requested): ~/gif-player
+WorkingDirectory=%h/gif-player
+
+# App config
+Environment=PORT=8001
+Environment=DISPLAY_DRIVER=gc9a01a
+Environment=GIF_DIR=/media/pi/GIFS
+
+# Assumes you set up a venv at ~/gif-player/backend/.venv and built the UI into ~/gif-player/frontend/dist
+ExecStart=%h/gif-player/backend/.venv/bin/python %h/gif-player/backend/run_server.py
+
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
+

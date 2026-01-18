@@ -96,6 +96,63 @@ Troubleshooting:
 - If the UI shows `GET http://localhost:5173/api/... 404`, your proxy is pointing at the wrong port (set `VITE_API_TARGET` and restart `npm run dev`).
 - If you see `net::ERR_CONNECTION_REFUSED` for `http://127.0.0.1:8001/api/status`, the backend isn't actually running on that port (re-run the backend command and keep it running).
 
+## One-command run (single-process: backend serves UI + API)
+
+If you build the UI once, the backend will serve it from `frontend/dist/`, so you can run everything as **one process** (ideal for `systemd`).
+
+From the repo root:
+
+```bash
+make run
+```
+
+Then open:
+- UI: `http://localhost:8000/`
+- API docs: `http://localhost:8000/docs`
+
+## systemd (.service) deploy (Raspberry Pi)
+
+A sample unit file is included at `deploy/gif-player.service`.
+
+High-level steps (typical setup):
+- Copy this repo to `~/gif-player`
+- Create backend venv and install deps
+- Build the UI to `frontend/dist`
+- Copy the unit file into `/etc/systemd/system/gif-player.service`
+- Enable + start the service
+
+Example install (on the Pi, as user `pi`):
+
+```bash
+cd ~/gif-player/backend
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+Build UI:
+
+```bash
+cd ~/gif-player/frontend
+npm install
+npm run build
+```
+
+Install + start service (uses port 8001 by default):
+
+```bash
+sudo cp ~/gif-player/deploy/gif-player.service /etc/systemd/system/gif-player.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now gif-player.service
+```
+
+Check logs:
+
+```bash
+sudo journalctl -u gif-player.service -f
+```
+
+
 ### 1) Enable SPI on Raspberry Pi
 
 Enable SPI using `raspi-config` (or equivalent for your distro), then reboot.

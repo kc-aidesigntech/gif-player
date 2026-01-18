@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from starlette.staticfiles import StaticFiles
 
 from config import Config
 from display_factory import create_display
@@ -106,6 +108,26 @@ def create_app() -> FastAPI:
     def post_select(index: int):
         player.select(index)
         return {"ok": True}
+
+    # --- Optional UI hosting (single-process deploy) ---
+    # If `frontend/dist/` exists, serve it from the same server as the API.
+    repo_root = Path(__file__).resolve().parent.parent
+    dist_dir = repo_root / "frontend" / "dist"
+
+    class SPAStaticFiles(StaticFiles):
+        """
+        Serve a Vite-built SPA with an index.html fallback for client-side routes.
+        """
+
+        async def get_response(self, path: str, scope):  # type: ignore[override]
+            res = await super().get_response(path, scope)
+            if res.status_code == 404:
+                # Fall back to SPA entrypoint
+                return await super().get_response("index.html", scope)
+            return res
+
+    if dist_dir.exists():
+        app.mount("/", SPAStaticFiles(directory=str(dist_dir), html=True), name="ui")
 
     return app
 
