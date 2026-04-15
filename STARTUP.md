@@ -1,6 +1,8 @@
 ## gif-player startup guide
 
-This doc is the **copy/paste “get it running”** guide for:
+This doc is the **legacy Raspberry Pi/Linux** copy/paste guide. For QT Py S3 + CircuitPython, use `circuitpython/README.md`.
+
+This legacy guide covers:
 - Local dev on a laptop (mock display)
 - Single-process run (backend serves UI + API)
 - Raspberry Pi `systemd` service (repo at `~/gif-player`, port `8001`)

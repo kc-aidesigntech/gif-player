@@ -1,0 +1,26 @@
+# CircuitPython settings.toml
+# Values are exposed via os.getenv("NAME") at runtime.
+
+# EYESPI BFF defaults for QT Py (PID 5772)
+TFT_CS="TX"
+TFT_DC="RX"
+TFT_RST="none"
+SD_CS="A3"
+
+# SPI baudrate (reduce if you see instability/safe-mode)
+SPI_BAUDRATE="40000000"
+
+# Media locations
+SD_MOUNT="/sd"
+SD_GIF_DIR="/sd/gifs"
+CIRCUITPY_GIF="/sample.gif"
+
+# Playback behavior
+PLAYLIST_MODE="loop"     # loop | once
+PER_GIF_SECONDS="0"      # 0 = play full GIF duration (if known) per file
+
+# Optional buttons (set to a valid board pin name like "A0", otherwise "none")
+BTN_NEXT="none"
+BTN_PREV="none"
+BTN_DEBOUNCE_MS="150"
+

@@ -1,15 +1,21 @@
-## GIF Player for GC9A01A (EYESPI) on Raspberry Pi
+## GIF Player for GC9A01A (EYESPI) on QT Py ESP32‑S3 (CircuitPython)
 
-This repo is building a small **GIF player appliance**:
+This repo is building a small **GIF player appliance** targeting **QT Py ESP32‑S3 + CircuitPython**:
 
-- **Reads GIFs from microSD** (mounted by Linux)
-- **Plays them on a 240×240 round GC9A01A TFT** over SPI
-- Supports **two physical buttons**: next / previous
-- Optionally exposes a **modern web control UI (React/TypeScript)** (planned)
+- **Reads GIFs from microSD** (preferred) or `CIRCUITPY`
+- **Plays them on a 240×240 round GC9A01A TFT** over SPI (EYESPI)
+- Designed to extend later with **buttons** (next / previous)
 
 If you’re new here, start with:
 
 - `ENGINEERING_PLAN.md` — the “source of truth” for architecture, wiring, and decisions.
+
+## Quickstart (QT Py S3 / CircuitPython)
+Use the drop-in fileset under `circuitpython/`.
+
+- Instructions: `circuitpython/README.md`
+- Main entrypoint: `circuitpython/code.py`
+- Settings: `circuitpython/settings.toml`
 
 ### Hardware (v0 target)
 
@@ -17,20 +23,15 @@ If you’re new here, start with:
   - Wiring reference image: `https://cdn-shop.adafruit.com/product-files/6178/round+TFT+1.28in+GC9A01.png`
 - **Connector board**: Adafruit EYESPI BFF for QT Py or Xiao (5772)
   - Product page: `https://www.adafruit.com/product/5772`
-- **Host**: Raspberry Pi running Linux (SPI enabled)
-- **Inputs**: 2 momentary push-buttons
+- **MCU**: Adafruit QT Py ESP32‑S3 with 2MB PSRAM (5700)
+- **Inputs (planned)**: 2 momentary push-buttons
 
 ### What’s in the repo today
 
-This is intentionally “simple Python first”:
+This repo includes two tracks:
 
-- **GIF playlist scan**: `backend/gif_playlist.py`
-- **GIF decode + playback loop**: `backend/player_service.py` (Pillow → RGB565 → display)
-- **GC9A01A SPI driver (fast path)**: `backend/display_gc9a01a.py` (`spidev` + `RPi.GPIO`)
-- **Mock display (dev on laptop)**: `backend/display_mock.py`
-- **Display selection**: `backend/display_factory.py`
-- **Buttons (RPi.GPIO)**: `backend/gpio_buttons.py`
-- **Central config**: `backend/config.py`
+- **CircuitPython (primary)**: `circuitpython/` — copy-to-`CIRCUITPY` app for QT Py S3 + GC9A01A.
+- **Legacy Raspberry Pi (secondary/archived)**: `backend/`, `frontend/`, `deploy/` — the earlier Linux appliance approach (kept for reference).
 
 ### Design goals
 
@@ -39,7 +40,9 @@ This is intentionally “simple Python first”:
 - **Performance**: keep a direct `spidev` fast-path for full-frame GIF animation
 - **Extensibility**: a clean foundation for later features (remote control, playlists, AI GIF generation workflow, etc.)
 
-## Quickstart
+## Legacy (Raspberry Pi) quickstart (optional)
+
+The sections below describe the older Pi/Linux service; they’re kept for reference but are not the primary deployment target anymore.
 
 ### Run the local API server (needed for the React UI)
 

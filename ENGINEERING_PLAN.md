@@ -1,6 +1,8 @@
 ## Overview
 
-This repo is building a **simple GIF player appliance** for Raspberry Pi that:
+This repo’s **primary target is now QT Py ESP32‑S3 + CircuitPython** (see `circuitpython/README.md`).
+
+This document describes the **legacy Raspberry Pi/Linux** architecture and wiring assumptions from the earlier version of the project:
 
 - Reads `.gif` files from the **microSD card** on the Adafruit GC9A01A round TFT breakout (mounted by Linux).
 - Displays GIFs on a **240×240 SPI TFT (GC9A01A)**.
