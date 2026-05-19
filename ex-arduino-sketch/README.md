@@ -34,6 +34,7 @@ On boot you should see a brief green **GIF** splash, then the animation loops.
 | **SD?** (red) | SD card not mounting — reseat card, check FAT32 |
 | **No GIF** (yellow) | SD OK but no file at `/gifs/sample.gif` or `/sample.gif` |
 | Black / garbage | Try lowering `TFT_SPI_HZ` in the sketch (e.g. `20000000`) |
+| Serial shows `SD.begin failed` at every speed | Upload `sd_card_test/sd_card_test.ino` to isolate SD. Display can work without MISO; SD cannot. See [Adafruit 6178 pinouts](https://learn.adafruit.com/adafruit-1-28-240x240-round-tft-lcd/pinouts). |
 
 ## Different wiring?
 
