@@ -17,9 +17,12 @@ Board: **Adafruit QT Py ESP32-S3** (4MB flash / 2MB PSRAM).
 
 ## Gift setup
 
-1. Format the display’s microSD as FAT32.
+The **microSD slot is on the round TFT PCB** (back of the 1.28" display), not on the QT Py. The ribbon carries SPI to that reader.
+
+1. Format the card as **FAT32**.
 2. Create folder `gifs` on the card.
 3. Copy [`assets/sample.gif`](../assets/sample.gif) to `gifs/sample.gif` on the SD card.
+4. Insert the card in the **TFT module** slot until it clicks.
 4. Open `qtpy_s3_gc9a01a_gif/qtpy_s3_gc9a01a_gif.ino`, upload, power cycle.
 
 On boot you should see a brief green **GIF** splash, then the animation loops.

@@ -5,12 +5,15 @@
  * With the EYESPI BFF stacked on the QT Py, the BFF routes:
  *   TFT CS  -> pin labeled TX  (GPIO, not "use UART")
  *   TFT DC  -> pin labeled RX
- *   SD CS   -> A3
- *   SCK/MOSI/MISO -> QT Py default SPI (also on the ribbon)
+ *   SD CS   -> A3 (chip select for the card reader ON the TFT PCB)
+ *   SCK/MOSI/MISO -> shared SPI through the ribbon
+ *
+ * The microSD slot is on the 1.28" round TFT module — NOT on the QT Py.
+ * Push the card into the slot on the back of the round display until it clicks.
  *
  * Gift setup:
- *   1. Copy assets/sample.gif to the microSD as /gifs/sample.gif
- *   2. Insert SD into the display breakout, power on — it loops forever.
+ *   1. Format the card FAT32; copy assets/sample.gif to gifs/sample.gif
+ *   2. Insert SD in the TFT slot, power on — it loops forever.
  */
 
 #include <SPI.h>
@@ -28,7 +31,7 @@
 // --- tuning ---
 // Start slow while bringing up hardware; raise to 30000000 once colors work.
 static const uint32_t TFT_SPI_HZ = 8000000;
-static const uint32_t SD_SPI_HZ = 20000000;
+static const uint32_t SD_SPI_HZ = 4000000;  // raise to 20000000 once SD mounts reliably
 
 // Full-screen red/green/blue/white at boot. Set false after display works.
 #define BOOT_COLOR_TEST true
@@ -134,10 +137,56 @@ static void GIFDraw(GIFDRAW *pDraw) {
   }
 }
 
-static bool mountSD() {
-  pinMode(SD_CS, OUTPUT);
+static void busIdle() {
+  digitalWrite(TFT_CS, HIGH);
   digitalWrite(SD_CS, HIGH);
-  return SD.begin(SD_CS, SPI, SD_SPI_HZ);
+}
+
+static bool mountSD() {
+  // TFT and SD share one SPI bus through the EYESPI ribbon. Only talk to SD
+  // while the display chip select is high (idle).
+  busIdle();
+  delay(10);
+
+  const uint32_t speeds[] = {400000, 1000000, 4000000, SD_SPI_HZ};
+  for (uint32_t hz : speeds) {
+    SD.end();
+    delay(30);
+    if (SD.begin(SD_CS, SPI, hz)) {
+      Serial.printf("SD mounted at %lu Hz\n", hz);
+      return true;
+    }
+    Serial.printf("SD.begin failed at %lu Hz\n", hz);
+  }
+
+  SD.end();
+  delay(30);
+  if (SD.begin(SD_CS)) {
+    Serial.println("SD mounted (default SPI settings)");
+    return true;
+  }
+
+  Serial.println("SD mount failed — card in TFT slot? FAT32? ribbon seated?");
+  return false;
+}
+
+static void listSdRoot() {
+  File root = SD.open("/");
+  if (!root) {
+    Serial.println("SD open / failed");
+    return;
+  }
+  Serial.println("SD contents:");
+  while (true) {
+    File entry = root.openNextFile();
+    if (!entry) break;
+    Serial.print("  ");
+    Serial.print(entry.name());
+    if (entry.isDirectory()) Serial.println("/");
+    else Serial.println();
+    entry.close();
+  }
+  root.close();
 }
 
 static const char *openAnyGif() {
@@ -156,7 +205,8 @@ void setup() {
   Serial.println("gif-player boot");
 
   pinMode(TFT_CS, OUTPUT);
-  digitalWrite(TFT_CS, HIGH);
+  pinMode(SD_CS, OUTPUT);
+  busIdle();
 
 #if defined(ARDUINO_ADAFRUIT_QTPY_ESP32S3) || defined(ARDUINO_ADAFRUIT_QTPY_ESP32S3_NOPSRAM)
   SPI.begin(SCK, MISO, MOSI);
@@ -164,6 +214,9 @@ void setup() {
   SPI.begin();
 #endif
 
+  delay(100);  // let the TFT module's SD socket power up
+
+  // Display first (clean color splash), then mount SD on the shared bus.
   tft.begin(TFT_SPI_HZ);
   tft.setRotation(0);
 
@@ -172,17 +225,19 @@ void setup() {
   displaySelfTest();
 #endif
 
-  splash("GIF", GC9A01A_GREEN);
-  delay(400);
-
-  if (!mountSD()) {
+  bool sdOk = mountSD();
+  if (!sdOk) {
     splash("SD?", GC9A01A_RED);
-    while (true) {
-      delay(1000);
-      if (mountSD()) break;
+    Serial.println("Insert microSD in the TFT (round display) slot, FAT32");
+    while (!sdOk) {
+      delay(1500);
+      sdOk = mountSD();
     }
   }
 
+  splash("GIF", GC9A01A_GREEN);
+  delay(200);
+  listSdRoot();
   gif.begin(LITTLE_ENDIAN_PIXELS);
 }
 
