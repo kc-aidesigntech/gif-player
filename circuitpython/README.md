@@ -19,11 +19,12 @@ Per the EYESPI BFF defaults:
    - `code.py`
    - `settings.toml`
    - `lib/adafruit_gc9a01a.py`
-3) Put a test GIF at `CIRCUITPY/sample.gif`.
+3) Put a test GIF at `CIRCUITPY/sample.gif` (you can use `assets/sample.gif` from this repo).
 
 If you have a microSD in the TFT breakout:
 - Create `/gifs` on the SD card and put `.gif` files inside.
 - The player will try to mount SD at `/sd` and play from `/sd/gifs` first.
+  - For the Arduino sketch, copy `assets/sample.gif` to the SD card as `/gifs/sample.gif`.
 
 ## Settings
 Edit `settings.toml`:
